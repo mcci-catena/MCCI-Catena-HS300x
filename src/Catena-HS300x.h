@@ -78,7 +78,7 @@ class cHS300x
     {
 private:
     // control result of isDebug(); use for compiling code in/out.
-    static constexpr bool kfDebug = true;
+    static constexpr bool kfDebug = false;
 
     // the device i2c address. This is fixed by design.
     static constexpr std::int8_t kAddress = 0x44;
