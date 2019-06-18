@@ -1,7 +1,17 @@
 # MCCI Catena&reg; IDT HS300x Sensor Library
 
-This library provides a simple interface to IDT HS3001 and HS3002 temperature/humidity sensors.
+This library provides a simple interface to IDT HS3001 and HS3002 temperature/humidity sensors. Although we tested this on the MCCI Catena 4617, there are no dependencies on MCCI hardware; this should work equally well with IDT breakout boards, etc.
 
+<!-- TOC depthFrom:2 updateOnSave:true -->
+
+- [Introduction](#introduction)
+- [Header File](#header-file)
+- [Library Dependencies](#library-dependencies)
+- [Example Scripts](#example-scripts)
+- [Namespace](#namespace)
+- [Instance Object](#instance-object)
+
+<!-- /TOC -->
 ## Introduction
 
 Clients interact with IDT HS300x sensors via the following sequence.
@@ -33,6 +43,16 @@ This matches temperature from the sensor, but humidity is left-shifted two bits 
 ```c++
 #include <Catena-HS300x.h>
 ```
+
+## Library Dependencies
+
+None, beyond the normal Arduino library `<Wire.h>`.  It can be used with [Catena-Arduino-Platform](https://github.com/mcci-catena/Catena-Arduino-Platform), but it doesn't require it.
+
+## Example Scripts
+
+See [hs300x-simple](./examples/hs300x-simple/hs300x-simple.ino). Hs300x-simple reads and displays the temperature and humidity once a second, using the simple APIs.
+
+![Screenshot of hs300x-simple.ino in operation](./assets/hs300x-simple-screenshot.png)
 
 ## Namespace
 
