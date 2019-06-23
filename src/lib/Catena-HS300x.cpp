@@ -78,7 +78,7 @@ bool cHS300x::getTemperatureHumidityRaw(cHS300x::MeasurementsRaw &mRaw) const
         {
         mRaw.TemperatureBits = mRaw.HumidityBits = 0;
         }
-    
+
     return fResult;
     }
 
