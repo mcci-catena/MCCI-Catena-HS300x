@@ -31,26 +31,26 @@ void cHS300x::end(void)
     {
     }
 
-bool cHS300x::getTemperatureHumidity(float &t, float &rh) const
+bool cHS300x::getTemperatureHumidity(cHS300x::Measurements &m) const
     {
-    uint16_t tfrac, rhfrac;
+    MeasurementsRaw mRaw;
     bool fResult;
 
-    fResult = this->getTemperatureHumidityRaw(tfrac, rhfrac);
+    fResult = this->getTemperatureHumidityRaw(mRaw);
     if (fResult)
         {
-        t = this->rawTtoCelsius(tfrac);
-        rh = this->rawRHtoPercent(rhfrac);
+        /* set m from bits in mRaw */
+        m.set(mRaw);
         }
     else
         {
-        t = rh = NAN;
+        m.Temperature = m.Humidity = NAN;
         }
 
     return fResult;
     }
 
-bool cHS300x::getTemperatureHumidityRaw(std::uint16_t &tfrac, std::uint16_t &rhfrac) const
+bool cHS300x::getTemperatureHumidityRaw(cHS300x::MeasurementsRaw &mRaw) const
     {
     uint32_t msDelay;
     bool fResult;
@@ -67,15 +67,16 @@ bool cHS300x::getTemperatureHumidityRaw(std::uint16_t &tfrac, std::uint16_t &rhf
         delay(msDelay);
 
         uint32_t tStart = millis();
-        
+
+        /* loop trying to read data  */
         do  {
-            fResult = this->getMeasurementResultsRaw(tfrac, rhfrac);
+            fResult = this->getMeasurementResultsRaw(mRaw);
             } while (! fResult && (millis() - tStart) < this->kGetTemperatureTimeoutMs);
         }
 
     if (! fResult)
         {
-        tfrac = rhfrac = 0;
+        mRaw.TemperatureBits = mRaw.HumidityBits = 0;
         }
     
     return fResult;
@@ -103,22 +104,21 @@ std::uint32_t cHS300x::startMeasurement(void) const
         }
     }
 
-bool cHS300x::getMeasurementResults(float &t, float &rh) const
+bool cHS300x::getMeasurementResults(cHS300x::Measurements &m) const
     {
-    uint16_t tfrac, rhfrac;
+    MeasurementsRaw mRaw;
     bool fResult;
 
-    fResult = this->getMeasurementResultsRaw(tfrac, rhfrac);
+    fResult = this->getMeasurementResultsRaw(mRaw);
     if (fResult)
         {
-        t = this->rawTtoCelsius(tfrac);
-        rh = this->rawRHtoPercent(rhfrac);
+        m.set(mRaw);
         }
 
     return fResult;
     }
 
-bool cHS300x::getMeasurementResultsRaw(std::uint16_t &tfrac, std::uint16_t &rhfrac) const
+bool cHS300x::getMeasurementResultsRaw(cHS300x::MeasurementsRaw &mRaw) const
     {
     std::uint8_t buf[4];
     bool fResult;
@@ -140,8 +140,8 @@ bool cHS300x::getMeasurementResultsRaw(std::uint16_t &tfrac, std::uint16_t &rhfr
 
     if (fResult)
         {
-        tfrac = ((buf[2] << 8) | buf[3]) & 0xFFFCu;
-        rhfrac = (buf[0] << 10) | (buf[1] << 2);
+        mRaw.TemperatureBits = ((buf[2] << 8) | buf[3]) & 0xFFFCu;
+        mRaw.HumidityBits = (buf[0] << 10) | (buf[1] << 2);
         }
 
     return fResult;

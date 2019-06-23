@@ -66,7 +66,7 @@ getLocal(std::uint32_t v)
     }
 
 // version of library, for use by clients in static_asserts
-static constexpr std::uint32_t kVersion = makeVersion(0,1,0,0);
+static constexpr std::uint32_t kVersion = makeVersion(0,2,0,0);
 
 /****************************************************************************\
 |
@@ -102,27 +102,6 @@ public:
     cHS300x(const cHS300x&&) = delete;
     cHS300x& operator=(const cHS300x&&) = delete;
 
-    // Start operation (return true if successful)
-    bool begin();
-
-    // End operation
-    void end();
-
-    // get temperature and humidity as normalized 16-bit fractions
-    bool getTemperatureHumidityRaw(std::uint16_t &t, std::uint16_t &rh) const;
-
-    // get temperature and humidity as floats in engineering units
-    bool getTemperatureHumidity(float &T, float &rh) const;
-
-    // start a measurement; return the millis to delay before expecting an answer
-    std::uint32_t startMeasurement(void) const;
-
-    // get asynch measurement results, if available.
-    bool getMeasurementResults(float &T, float &rh) const;
-
-    // get raw measurement results, if available.
-    bool getMeasurementResultsRaw(std::uint16_t &tfrac, std::uint16_t &rhfrac) const;
-
     // convert raw temperature to celsius
     static constexpr float rawTtoCelsius(std::uint16_t tfrac)
         {
@@ -157,6 +136,56 @@ public:
         else
             return (std::uint16_t) (float(0xFFFC) * (rh / 100.0));
         }
+
+    // raw measurements as a collection.
+    struct MeasurementsRaw
+        {
+        std::uint16_t   TemperatureBits;
+        std::uint16_t   HumidityBits;
+        void extract(std::uint16_t &a_t, std::uint16_t &a_rh) const
+            {
+            a_t = this->TemperatureBits;
+            a_rh = this->HumidityBits;
+            }
+        };
+
+    // measurements, as a collection.
+    struct Measurements
+        {
+        float Temperature;
+        float Humidity;
+        void set(const MeasurementsRaw &mRaw)
+            {
+            this->Temperature = rawTtoCelsius(mRaw.TemperatureBits);
+            this->Humidity = rawRHtoPercent(mRaw.HumidityBits);
+            }
+        void extract(float &a_t, float &a_rh) const
+            {
+            a_t = this->Temperature;
+            a_rh = this->Humidity;
+            }
+        };
+
+    // Start operation (return true if successful)
+    bool begin();
+
+    // End operation
+    void end();
+
+    // get temperature and humidity as normalized 16-bit fractions
+    bool getTemperatureHumidityRaw(MeasurementsRaw &mRaw) const;
+
+    // get temperature and humidity as floats in engineering units
+    bool getTemperatureHumidity(Measurements &m) const;
+
+    // start a measurement; return the millis to delay before expecting an answer
+    std::uint32_t startMeasurement(void) const;
+
+    // get asynch measurement results, if available.
+    bool getMeasurementResults(Measurements &m) const;
+
+    // get raw measurement results, if available.
+    bool getMeasurementResultsRaw(MeasurementsRaw &mRaw) const;
 
     // return true if configured for debugging; compile-time constant.
     static constexpr bool isDebug() { return kfDebug; }

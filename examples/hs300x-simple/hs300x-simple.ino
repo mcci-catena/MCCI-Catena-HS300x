@@ -67,14 +67,16 @@ void setup()
 
 void loop()
     {
+    cHS300x::Measurements m;
     float t, rh;
 
-    if (! gHs300x.getTemperatureHumidity(t, rh))
+    if (! gHs300x.getTemperatureHumidity(m))
         {
         Serial.println("can't read T/RH");
         }
     else
         {
+        m.extract(t, rh);
         Serial.print("T(F)=");
         Serial.print(t * 1.8 + 32);
         Serial.print("  RH=");

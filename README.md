@@ -24,6 +24,12 @@ Clients interact with IDT HS300x sensors via the following sequence.
 
    To collect results, the client occasionaly calls `cHS300x::getMeasurementResults()` or `cHS300x::getMeasurementResultsRaw()`. If a measurement is available, it will be returned, and the method returns `true`; otherwise, the method returns `false`.  To save power, the client should delay the appropriate number of milliseconds between calls (as indicated by the result of `cHS300x::startMeasurement()`).
 
+Measurements are returned in structures (`cHS300x::Measurements` or `cHS300x::MeasurementsRaw`, respectively.) These structures have some utility methods:
+
+- `cHS300x::Measurments::set(const cHS300x::MeasurementsRaw &mRaw)` sets the target `Measurement` to the engineering-units equivalent of `mRaw`.
+- `cHS300x::Measurments::extract(float &t, float &rh) const` sets `t` to the temperature (in Celsius), and `rh` to the relative humidity (in percent).
+- `cHS300x::MeasurmentsRaw::extract(std::uint16_t &t, std::uint16_t &rh) const` sets `t` and `rh` to the raw measurement from the device.
+
 Utility methods allow the client to manage the sensor.
 
 - `cHS300x::end()` idles the device, and is typically used prior to sleeping the system.
