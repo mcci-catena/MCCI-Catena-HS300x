@@ -15,6 +15,8 @@ Author:
 
 #include <Catena-HS300x.h>
 
+#include <Arduino.h>
+
 using namespace McciCatenaHs300x;
 
 bool cHS300x::begin(void)

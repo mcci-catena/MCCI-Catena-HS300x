@@ -17,8 +17,31 @@ Author:
 # define _CATENA_HS300X_H_
 # pragma once
 
-#include <cstdint>
+// AVR doesn't have <cstdint> but we want to use it... so work around it.
+#ifndef __CATENA_HAVE_CSTDINT
+# ifdef __AVR__
+#  define _CATENA_HAVE_CSTDINT	0
+# else
+#  define _CATENA_HAVE_CSTDINT 1
+# endif
+#endif
+
+#if _CATENA_HAVE_CSTDINT
+# include <cstdint>
+#else
+# include <stdint.h>
+namespace std {
+  using ::int8_t;
+  using ::uint8_t;
+  using ::int16_t;
+  using ::uint16_t;
+  using ::int32_t;
+  using ::uint32_t;
+}
+#endif
+
 #include <Wire.h>
+
 
 namespace McciCatenaHs300x {
 
@@ -115,26 +138,22 @@ public:
         }
 
     // convert Celsius temperature to raw format.
+private:
+    static constexpr float biasCelsius(float t) { return t + 40.0f; }
+public:
     static constexpr std::uint16_t celsiusToRawT(float t)
         {
-        t += 40.0f;
-        if (t < 0.0f)
-            return 0;
-        else if (t > 165.0)
-            return 0xFFFCu;
-        else
-            return (std::uint16_t) ((t / 165.0f) * float(0xFFFC));
+        return (t < 0.0f)   ?   0 :
+               (t > 165.0)  ?   0xFFFCu :
+                                (std::uint16_t) ((t / 165.0f) * float(0xFFFC));
         }
 
     // convert RH as percentage to raw format.
     static constexpr std::uint16_t percentRHtoRaw(float rh)
         {
-        if (rh > 100.0)
-            return 0xFFFCu;
-        else if (rh < 0.0)
-            return 0;
-        else
-            return (std::uint16_t) (float(0xFFFC) * (rh / 100.0));
+        return (rh > 100.0) ?   0xFFFCu :
+               (rh < 0.0)   ?   0 :
+                                (std::uint16_t) (float(0xFFFC) * (rh / 100.0));
         }
 
     // raw measurements as a collection.
